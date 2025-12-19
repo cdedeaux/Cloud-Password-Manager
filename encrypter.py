@@ -15,7 +15,7 @@ def salt():
 ph = PasswordHasher(hash_len=32)
 verification_hash = ph.hash(master_password)
 
-salt = os.urandom(16) #store this salt securely
+salt = salt() #store this salt securely
 
 kdf = PBKDF2HMAC(
     algorithm=hashes.SHA256(),
@@ -28,6 +28,7 @@ web_pass = input("Input password ")
 cipher = AES.new(encryption_key, AES.MODE_EAX)
 nonce = cipher.nonce
 ciphertext, tag = cipher.encrypt_and_digest(web_pass.encode())
+
 print("Ciphertext:", ciphertext)
 print("Nonce:", nonce)
 print("Tag:", tag)
@@ -36,3 +37,5 @@ cipher_decrypt = AES.new(encryption_key, AES.MODE_EAX, nonce=nonce)
 plaintext = cipher_decrypt.decrypt_and_verify(ciphertext, tag)
 password = plaintext.decode()
 print("Decrypted password:", password)
+
+
