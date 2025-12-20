@@ -11,19 +11,21 @@ class Database:
             sys.exit()
         
         cur = self.connection.cursor()
-        cur.execute("CREATE TABLE IF NOT EXISTS encrypted_passwords(website, password TEXT UNIQUE)")
+        cur.execute("CREATE TABLE IF NOT EXISTS encrypted_passwords(website, password TEXT UNIQUE, nonce BLOB, tag BLOB)")
         self.connection.commit()
         self.connection.close()
-    def add_password(self, website, encrypted_password):
+    def add_password(self, website, encrypted_password, nonce, tag):
         try:
             self.connection = sqlite3.connect(self.db_name)
             cur = self.connection.cursor()
-            cur.execute("INSERT INTO encrypted_passwords(website, password) VALUES (?, ?)", (website, encrypted_password,))
+            cur.execute("INSERT INTO encrypted_passwords(website, password, nonce, tag) VALUES (?, ?, ?, ?)", (website, encrypted_password, nonce, tag))
             self.connection.commit()
         except sqlite3.IntegrityError:
             print("Password already exists in the database.")
         finally:
             self.connection.close()
+
+
     def add_verifications(self, salt, verification_hash):
         try:
             self.connection = sqlite3.connect(self.db_name)
@@ -36,7 +38,7 @@ class Database:
             cur.execute("INSERT INTO user_data(verification_hash, salt) VALUES (?, ?)", (verification_hash, salt))
             self.connection.commit()
         except sqlite3.IntegrityError:
-            print("Salt already exists in the database.")
+            print("User data already exists in the database.")
         finally:
             self.connection.close()
 db = Database()
