@@ -24,5 +24,20 @@ class Database:
             print("Password already exists in the database.")
         finally:
             self.connection.close()
+    def add_verifications(self, salt, verification_hash):
+        try:
+            self.connection = sqlite3.connect(self.db_name)
+            cur = self.connection.cursor()
+            cur.execute("CREATE TABLE IF NOT EXISTS user_data(verification_hash TEXT UNIQUE,salt BLOB UNIQUE)")
+            cur.execute("SELECT COUNT(*) FROM user_data")
+            if (cur.fetchone()[0] > 0):
+                print("User data already exists in the database.")
+                return
+            cur.execute("INSERT INTO user_data(verification_hash, salt) VALUES (?, ?)", (verification_hash, salt))
+            self.connection.commit()
+        except sqlite3.IntegrityError:
+            print("Salt already exists in the database.")
+        finally:
+            self.connection.close()
 db = Database()
 print("Database created successfully!")
