@@ -11,7 +11,7 @@ class Database:
             sys.exit()
         
         cur = self.connection.cursor()
-        cur.execute("CREATE TABLE IF NOT EXISTS encrypted_passwords(website, password TEXT UNIQUE, nonce BLOB, tag BLOB)")
+        cur.execute("CREATE TABLE IF NOT EXISTS encrypted_passwords(website, ciphertext TEXT UNIQUE, nonce BLOB, tag BLOB)")
         self.connection.commit()
         self.connection.close()
     def add_password(self, website, encrypted_password, nonce, tag):
@@ -39,6 +39,38 @@ class Database:
             self.connection.commit()
         except sqlite3.IntegrityError:
             print("User data already exists in the database.")
+        finally:
+            self.connection.close()
+    def get_decryption_data(self, website, db_name='encrypted_passwords.db'):
+        try:
+            self.connection = sqlite3.connect(db_name)
+            cur = self.connection.cursor()
+            cur.execute("SELECT ciphertextgit , nonce, tag FROM encrypted_passwords WHERE website=?", (website,))
+            result = cur.fetchone()
+            if result:
+                return result
+            else:
+                print("No data found for the specified website.")
+                return None
+        except sqlite3.Error as e:
+            print(f"Database error: {e}")
+            return None
+        finally:
+            self.connection.close()
+    def get_user_salt(self):
+        try:
+            self.connection = sqlite3.connect(self.db_name)
+            cur = self.connection.cursor()
+            cur.execute("SELECT salt FROM user_data")
+            result = cur.fetchone()
+            if result:
+                return result[0]
+            else:
+                print("No user salt found in the database.")
+                return None
+        except sqlite3.Error as e:
+            print(f"Database error: {e}")
+            return None
         finally:
             self.connection.close()
 db = Database()
