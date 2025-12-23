@@ -1,6 +1,4 @@
 from Crypto.Cipher import AES
-from argon2 import PasswordHasher
-import os
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
 def derive_encryption_key(master_password, salt):

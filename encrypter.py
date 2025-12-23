@@ -25,10 +25,4 @@ def create_encrypted_data(master_password, web_pass, salt):
     ciphertext, tag = cipher.encrypt_and_digest(web_pass.encode())
     return nonce, tag, ciphertext
 
-"""
-cipher_decrypt = AES.new(encryption_key, AES.MODE_EAX, nonce=nonce)
-plaintext = cipher_decrypt.decrypt_and_verify(ciphertext, tag)
-password = plaintext.decode()
-print("Decrypted password:", password)
-"""
 

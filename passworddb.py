@@ -18,7 +18,7 @@ class Database:
         try:
             self.connection = sqlite3.connect(self.db_name)
             cur = self.connection.cursor()
-            cur.execute("INSERT INTO encrypted_passwords(website, password, nonce, tag) VALUES (?, ?, ?, ?)", (website, encrypted_password, nonce, tag))
+            cur.execute("INSERT INTO encrypted_passwords(website, ciphertext, nonce, tag) VALUES (?, ?, ?, ?)", (website, encrypted_password, nonce, tag))
             self.connection.commit()
         except sqlite3.IntegrityError:
             print("Password already exists in the database.")
@@ -45,7 +45,7 @@ class Database:
         try:
             self.connection = sqlite3.connect(db_name)
             cur = self.connection.cursor()
-            cur.execute("SELECT ciphertextgit , nonce, tag FROM encrypted_passwords WHERE website=?", (website,))
+            cur.execute("SELECT ciphertext, nonce, tag FROM encrypted_passwords WHERE website=?", (website,))
             result = cur.fetchone()
             if result:
                 return result
@@ -73,5 +73,19 @@ class Database:
             return None
         finally:
             self.connection.close()
+    def get_password_list(self):
+        try:
+            self.connection = sqlite3.connect(self.db_name)
+            cur = self.connection.cursor()
+            cur.execute("SELECT website FROM encrypted_passwords")
+            result = cur.fetchall()
+            websites = [row[0] for row in result]
+            return websites
+        except sqlite3.Error as e:
+            print(f"Database error: {e}")
+            return []
+        finally:
+            self.connection.close()
+            #for testing purposes
 db = Database()
 print("Database created successfully!")
